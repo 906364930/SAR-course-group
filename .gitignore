@@ -463,3 +463,5 @@ $RECYCLE.BIN/
 Text/Reports/report_1.pdf
 Text/Reports/report_1R1.pdf
 Text/Reports/diffR0R1.pdf
+
+*.html

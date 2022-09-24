@@ -1,0 +1,275 @@
+---
+title: "SAR9_21"
+author: "Qingyu Luo,Junxiao Li,Jiawen Wang,Chaozhuo Hua"
+date: "2022/9/24"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+Import necessary files and packages.
+
+```{r setup,include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(reshape2)
+require(ggplot2)
+require(ggthemes)
+theme_set(theme_minimal())
+require(GGally)
+require(ggExtra)
+source("../../Code/R/imagematrix.R")
+```
+
+# K and G0 distributions
+
+## Probability density function of k distribution & random generator
+
+$$
+\mathrm{f}_{\mathrm{Z}}(z ; \alpha, \lambda, \mathrm{L})=\frac{2 \lambda \mathrm{L}}{\Gamma(\alpha) \Gamma(\mathrm{L})}(\lambda \mathrm{Lz})^{\frac{\alpha+\mathrm{L}}{2}-1} \mathrm{~K}_{\alpha-\mathrm{L}}(2 \sqrt{\lambda \mathrm{Lz}}) \mathbb{1}_{\mathbb{R}_{+}}(z)
+$$
+
+```{r}
+dKI <- function(z, p_alpha, p_lambda, p_Looks, log=FALSE) {
+  
+  if(log==FALSE) {
+    
+    lLz <- p_lambda * p_Looks* z
+    
+    return((2*p_lambda*p_Looks/(gamma(p_alpha)*gamma(p_Looks))) *
+             (lLz)^((p_alpha+p_Looks)/2-1) *
+             besselK(x = 2*sqrt(lLz), nu = p_alpha-p_Looks)
+    )
+  }
+  
+}
+rKI <- function(n, p_alpha,p_lambda, p_Looks) {
+  
+  return(
+    rgamma(n, 1, p_Looks)*rgamma(n, p_alpha/p_lambda, p_alpha)
+  )
+  
+}
+```
+
+## Probability density function of G0 distribution & random generator
+
+$$
+\mathrm{f}_{\mathrm{Z}}(z ; \alpha, \gamma, \mathrm{L})=\frac{\mathrm{L}^{\mathrm{L}} \Gamma(\mathrm{L}-\alpha)}{\gamma^\alpha \Gamma(\mathrm{L}) \Gamma(-\alpha)} \frac{z^{\mathrm{L}-1}}{(\gamma+\mathrm{Lz})^{\mathrm{L}-\alpha}}
+$$
+
+```{r}
+dGI0 <- function(z, p_alpha, p_gamma, p_Looks, log=FALSE) {
+  
+  if(log==TRUE) {
+    return(
+      (p_Looks*log(p_Looks) + lgamma(p_Looks-p_alpha) + (p_Looks-1)*log(z) ) - 
+        (p_alpha*log(p_gamma) + lgamma(-p_alpha) + lgamma(p_Looks) + 
+        (p_Looks-p_alpha)*log(p_gamma + z*p_Looks) ) 
+      )   
+    }
+  else { return( 
+    ( p_Looks^p_Looks * gamma(p_Looks-p_alpha) * z^(p_Looks-1) ) / 
+    (p_gamma^p_alpha * gamma(-p_alpha) * gamma(p_Looks) * (p_gamma + z*p_Looks)^(p_Looks-p_alpha)) 
+  )
+  }
+}
+rGI0 <- function(n, p_alpha, p_gamma, p_Looks) {
+  
+  return(
+    rgamma(n, 1, p_Looks) / rgamma(n, -p_alpha, p_gamma)
+  )
+  
+}
+```
+
+# Illustration of the K, G0 and Gamma distributions
+
+## density of a K distribution
+
+```{r fig.align = "center",fig.cap="K distribution"}
+s <- seq(0.001, 10, length.out = 500)
+s <- data.frame(s)
+ggplot(data=s, aes(x=s),
+       y=Transformations, 
+       color=Transformation) +
+  stat_function(fun=dKI, geom = "line", size=2, col="red", args = list(p_alpha=6, p_lambda=6, p_Looks=6)) +
+  xlab("x") + 
+  ylab("y") +
+  labs(title = "K Distribution") +
+  scale_x_log10()
+```
+
+## density of a G0 distribution
+
+```{r fig.align = "center",fig.cap='G0 distribution'}
+
+ggplot(data=s, aes(x=s)) +
+  stat_function(fun=dGI0, geom = "line", size=2, col="blue", args = list(p_alpha=-6, p_gamma=6, p_Looks=6)) +
+  xlab("x") + 
+  ylab("y") +
+  labs(title = "G0 Distribution") +
+  scale_x_log10()
+```
+
+## histogram and density of a K distribution
+
+```{r fig.align='center'}
+p_alpha=6
+p_lambda=6
+p_Looks=6
+pk_num=50000
+s <- rKI(pk_num, p_alpha, p_lambda, p_Looks) 
+s <- data.frame(s)
+ggplot(data=s, aes(x=s)) +
+  geom_histogram(aes(y=..density..),alpha=0.5, fill="yellow",color="black",bins=nclass.FD(unlist(s))/10) +
+  geom_density(col="red", size=1) +
+  geom_boxplot(aes(y=1), width=.1)+
+  stat_ecdf(col="blue") +
+  xlab("x") +
+  ylab("y") +
+  labs(title="histogram & density") +
+  scale_x_log10()
+```
+
+## histogram and density of a G0 distribution
+
+```{r G0 distribution random generator,fig.align='center',fig.cap='random number generators for G0 distribution'}
+p_alpha=-6
+p_gamma=6 
+p_Looks=6
+pG0_num=50000
+s <- rGI0(pG0_num,p_alpha, p_gamma, p_Looks)
+s <- data.frame(s)
+ggplot(data = s, aes(x=s)) +
+  geom_histogram(aes(y=..density..),alpha=0.5, fill="yellow",color="black",bins=nclass.FD(unlist(s))/10) +
+  geom_density(col="red", size=1) +
+  geom_boxplot(aes(y=1), width=.1)+
+  stat_ecdf(col="blue") +
+  xlab("x") +
+  ylab("y") +
+  labs(title = "Histogram & smoothed histogram") +
+  scale_x_log10()
+```
+
+## density of a dgamma distribution.
+
+```{r fig.align = "center"}
+s <- seq(0.001, 10, length.out = 500)
+s <- data.frame(s)
+ggplot(data=s, aes(x=s)) +
+  stat_function(fun=dgamma, geom = "line", size=2, col="red", args = list(shape=6, scale=1/6)) +
+
+  xlab("x") + 
+  ylab("y") +
+  labs(title = "dgamma Distribution") +
+  scale_x_log10()
+```
+
+## histogram of a dgamma distribution.
+
+```{r fig.align='center'}
+s <- seq(0.01, 10, length.out = 500)
+dg <- dgamma(s,6,1/6)
+dg <- data.frame(dg)
+ggplot(data=dg, aes(x=s)) +
+  geom_histogram(aes(y=..density..),
+                 bins=80,
+                 col="black", fill="white")+
+  xlab('x')+
+  ylab("density")
+```
+
+## density of a pgamma distribution.
+
+```{r fig.align = "center"}
+s <- seq(0.001, 10, length.out = 500)
+s <- data.frame(s)
+ggplot(data=s, aes(x=s)) +
+  stat_function(fun=pgamma, geom = "line", size=2, col="red", args = list(shape=6, scale=1/6)) +
+  xlab("x") + 
+  ylab("y")
+```
+
+## histogram of a pgamma distribution.
+
+```{r fig.align='center'}
+s <- seq(0.01, 10, length.out = 500)
+dg <- pgamma(s,6,1/6)
+dg <- data.frame(dg)
+ggplot(data=dg, aes(x=s)) +
+  geom_histogram(aes(y=..density..),
+                 bins=80,
+                 col="black", fill="white") +
+  xlab('x')+
+  ylab("density")
+```
+
+# Analysis of the bright image data
+
+```{r include=FALSE}
+load("../../Data/Rdata/bright.Rdata")
+```
+
+General Information of the dataset. From the information below, we can see the dataset is a 3-d tensor, containing 3x109x214 elements.
+
+```{r}
+dim(bright)
+typeof(bright)
+range(bright)
+bright_data <- data.frame(bright=as.vector(bright))
+summary(bright_data)
+```
+
+Set x to uniform scale and semilog scale, and plot the dataset separately.
+
+```{r fig.subcap=c('Linear scale', 'Semilogarithmic scale'),fig.align = "center"}
+ggplot(bright_data, aes(x=(bright))) +
+  geom_boxplot(notch = TRUE)+
+  geom_boxplot(outlier.colour="red", outlier.shape=21,outlier.size=1)+
+  ggtitle("plot of the dataset(uniform scale)")+
+  ylab("Boxplot")
+ggplot(bright_data, aes(x=bright)) +
+  geom_boxplot(notch = TRUE) +
+  geom_boxplot(outlier.colour="red", outlier.shape=21,outlier.size=1)+
+  scale_x_log10()+
+  ylab("Boxplot") +
+  ggtitle("plot of the dataset(semilog scale)")
+```
+It can be guessed from the histogram that the data obey lognormal distribution.
+
+```{r fig.align='center'}
+ggplot(bright_data, aes(x=bright)) +
+  geom_histogram(aes(y=..density..),
+                 bins=nclass.FD(unlist(bright_data)),
+                 col="black", fill="white") +
+  scale_x_log10()+
+  xlab("Intensity in semilog scale")+
+  ylab("Density") +
+  ggtitle("Histogram of the dataset")
+```
+Use q-q plot to visualize the data to further verify the hypothesis.
+```{r}
+bright_log = log(bright)
+qqnorm(bright_log)
+qqline(bright_log)
+```
+Generating an image using the "imagematrix" library.
+```{r Image,fig.align='center'}
+plot(imagematrix(normalize(bright)))
+```
+
+```{r}
+ymax <- 255
+ymin <- 0
+xmax <- max(bright)
+xmin <- min(bright)
+visual_bright = ((ymax-ymin)*(bright-xmin)/(xmax-xmin)+ymin)
+```
+Map the data to [0, 255] and plot again.
+```{r}
+plot(imagematrix(visual_bright))
+```
+
+
+
