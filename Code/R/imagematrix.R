@@ -5,7 +5,7 @@
 ##
 ## Copyright (c) 2003 Nikon Systems Inc.
 ## For complete license terms see file LICENSE
-
+##
 imagematrix <- function(mat, type=NULL, ncol=dim(mat)[1], nrow=dim(mat)[2],
                         noclipping=FALSE) {
   if (is.null(dim(mat)) && is.null(type)) stop("Type should be specified.")
