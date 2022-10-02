@@ -1,12 +1,13 @@
 ---
-title: "11_2homework"
-author: "Zhaoji Wu, Fanghan Yang, Zhenhang Weng, Xiyu Fan"
-date: "2021/11/1"
+title: "2022.9.22 Assignment III"
+author: "junxiao Li, choazhuo Hua, jiawen Wang, qingyu Luo"
+date: "2022/9/28"
 output:
   pdf_document: default
   html_document:
     df_print: paged
 ---
+
 
 Import the required packages during the experiment.
 ```{r setup, include=FALSE}
