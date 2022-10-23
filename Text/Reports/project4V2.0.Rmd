@@ -22,7 +22,7 @@ Load bright data.
 ```{r Load_Data}
 # Use your paths
 source("../../Code/R/imagematrix.R")
-load("../../Data/Binary/bright.Rdata")
+load("../../Data/Rdata/bright.Rdata")
 # Inspect what they are in the Environment window
 
 typeof(bright)

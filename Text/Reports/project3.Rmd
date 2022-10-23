@@ -26,7 +26,7 @@ Load the data bright.Rdata, analyze and process this data
 ```{r Load_Data}
 # paths
 source("../../Code/R/imagematrix.R")
-load("../../Data/Binary/bright.Rdata")
+load("../../Data/Rdata/bright.Rdata")
 # Inspect what they are in the Environment window
 
 typeof(bright)

@@ -1,0 +1,16 @@
+Report 2:
+* Always try using notches=TRUE in the boxplots because they give an idea of the precision of the median
+* Always run grammarly on your reports to avoid common mistakes in the use of the English language
+Marks: 10
+
+Report 3:
+* It was supposed to be your report, not mine. I see text in Portuguese, which I believe is not yours.
+* The data you were trying to load was not there; I fixed it.
+* Use \log, \exp and other reserved words in LaTeX
+Marks: 6
+
+Report 4:
+* The data you were trying to load was not there; I fixed it.
+* Very good phantom.
+Marks: 10
+
